@@ -1,0 +1,16 @@
+TODO -*- mode: org -*-
+
+* TODO
+** Functionality
+- For some reason, the attribute text input misses the last letter. It also doesn't like autocorrect at the end of editing
+- Create input component for addItem. It should have the attribute name above it or as a placeholder.
+- fix navigation stack so that after going into the createItem screen you can't go back to createCollection.
+- Make it so home rerenders somehow when a collection is added.
+- Add help modal to all screens
+- Put together onboarding screen
+- optional ads?
+** Structure
+ - abstract flatlist separator into its own component
+
+** Styles
+- abstract reused styles into global styles.
