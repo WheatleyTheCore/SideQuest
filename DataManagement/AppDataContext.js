@@ -1,24 +1,36 @@
 import { createContext, ReactElement, useState } from "react";
 import * as utils from './DatabaseUtils'
 
+// import dehydrated schemas
+let questSchema = require('./QuestSchema.json')
+let taskSchema = require('./TaskSchema.json')
+
 export const AppDataContext = createContext<AppContextInterface | null>(null)
 
 export const AppDataContextProvider = (props) => {
-    const [collectionNames, setCollectionNames] = useState([])
-    const [currentCollection, setCurrentCollection] = useState()
-    const [collections, setCollections] = useState([]);
+    const [questTitles, setQuestTitles] = useState([])
+    const [currentQuestData, setCurrentQuestData] = useState()
+    const [allQuestData, setAllQuestData] = useState([]);
 
     const database = getDBConnection();
 
     utils.createTableIfNotExists(database)
 
-    //TODO left of here
-    const getAllCollectionNames = () => {
+    const generateEmptyQuest = () => {
+        return Object.create(questSchema)
+    }
+
+    const generateEmptyTask = () => {
+        return Object.create(taskSchema)
+    }
+
+    const getAllQuestTitles = () => {
         let collectionNames = [];
         database.transaction(tx => {
-            tx.executeSql("select name from collections", [], (_, data) => {
+            tx.executeSql("select * from quests", [], (_, data) => {
                 data.rows._array.forEach(item => {
-                    collectionNames.push(item['name'])
+                    let parsedQuestData = JSON.parse(item['quest_data'])
+                    collectionNames.push(parsedQuestData.questName)
                 })
                 setCollectionNames(collectionNames)
             }, (_, err)=>{
@@ -27,14 +39,15 @@ export const AppDataContextProvider = (props) => {
         })
     }
 
-    const loadCurrentCollectionData = (collectionName: string) => {
+    const loadQuestData = () => {
+        let allQuestData = []
         database.transaction(tx => {
-            tx.executeSql("select * from collections where name = ?", [collectionName], (_, data) => {
-                let collectionData = collectionFactory()
-                collectionData.name = data.rows._array[0].name
-                collectionData.entrySchema = JSON.parse(data.rows._array[0].entry_schema)
-                collectionData.entries = JSON.parse(data.rows._array[0].entries)
-                setCurrentCollection(collectionData)
+            tx.executeSql("select * from quests", [], (_, data) => {
+                data.rows._array.forEach(item => {
+                    let parsedQuestData = JSON.parse(item['quest_data'])
+                    parsedQuestData['index'] = parseInt(item['id'])      // because id is not stored in quest_data
+                    collectionNames.push(parsedQuestData.questName)
+                })
 
             }, (_, err)=>{
                 console.log(err)
@@ -42,7 +55,7 @@ export const AppDataContextProvider = (props) => {
         })
     }
 
-    const createCollection = (collectionToSave: Collection) => {
+    const createQuest = (questToSave, id = null) => {
         let name = collectionToSave.name;
         let entrySchema = JSON.stringify(collectionToSave.entrySchema);
         let entries = JSON.stringify([]);
@@ -56,6 +69,8 @@ export const AppDataContextProvider = (props) => {
             })
         })
     }
+
+    // TODO left off here.,
 
     //updates name and entrySchema
     const updateCollection = (collectionToSave: Collection, name: string) => {

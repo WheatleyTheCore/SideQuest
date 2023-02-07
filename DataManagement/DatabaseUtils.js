@@ -1,6 +1,6 @@
 import { enablePromise, openDatabase, SQLiteDatabase } from 'react-native-sqlite-storage';
 
-const tableName = 'quest_log';
+const tableName = 'quests';
 
 export const getDBConnection = () => {
   return openDatabase({ name: 'quest_system.db', location: 'default' });
@@ -29,15 +29,15 @@ export const loadQuestsFromDatabase = (db) => {
   }
 };
 
-export const saveTodoItems = (db, todoItems) => {
+export const saveQuest = (db, questData) => {
   const insertQuery =
-    `INSERT OR REPLACE INTO ${tableName}(rowid, value) values` +
-    todoItems.map(i => `(${i.id}, '${i.value}')`).join(',');
+    `INSERT OR REPLACE INTO ${tableName}(rowid, quest_data) values` +
+    todoItems.map(i => `(${i.id}, '${i.quest_data}')`).join(',');
 
   return db.executeSql(insertQuery);
 };
 
-export const deleteTodoItem = (db, id) => {
+export const deleteQuest = (db, id) => {
   const deleteQuery = `DELETE from ${tableName} where rowid = ${id}`;
   db.executeSql(deleteQuery);
 };
